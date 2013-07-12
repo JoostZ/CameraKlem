@@ -1,6 +1,6 @@
 include <MCAD/nuts_and_bolts.scad>
 // Presentation
-parts = 0;
+parts = 1;
 top_part = 0;
 // Sizes
 
@@ -92,7 +92,7 @@ module footWedge() {
     translate([-25, -21 /2, -(30 + hole_radius)])
     rotate([0, 0, 90])  rotate([90, 0, 0])
     linear_extrude(height = 50, center = false)
-        polygon(points = [[0,0], [40,0], [21,30], [0,30]]);
+        polygon(points = [[0,0], [28.5,0], [28.5, 5], [21,30], [0,30]]);
 }
 
 if (parts == 0) {
