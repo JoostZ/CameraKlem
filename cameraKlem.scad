@@ -1,5 +1,12 @@
 include <MCAD/nuts_and_bolts.scad>
 // Presentation
+full = 1;
+top = 2;
+bottom = 3;
+toHold = 4;
+
+display = toHold;
+
 parts = 1;
 top_part = 0;
 // Sizes
@@ -95,13 +102,11 @@ module footWedge() {
         polygon(points = [[0,0], [28.5,0], [28.5, 5], [21,30], [0,30]]);
 }
 
-if (parts == 0) {
+if (display == full) {
 		klem();
         color("MediumPurple")clampBolts(0);
         color("MediumPurple") connectionBolt(0);
-} else {
-    //translate([20, 20, 0]) rotate([0, 0, 90])
-    if (top_part == 1) {
+} else if (display == top) {
         translate([0, 0, klem_thickness / 2])
         rotate([90, 0, 0])
             intersection() {
@@ -110,9 +115,10 @@ if (parts == 0) {
                         hole_radius + ring_size + 2], center = true);
                 klem();
             }
-    } else {
+} else if (display == bottom) {
         translate([0, 0, klem_thickness / 2])
         rotate([90, 0, 0])
             bottomPart();
-    }
+} else if (display == toHold) {
+    cylinder(r = hole_radius, h = 20, $fn = 100);
 }
