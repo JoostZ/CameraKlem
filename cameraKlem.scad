@@ -60,7 +60,7 @@ module klem() {
     tolerance = 0.5;
 	difference() {
 		fullPart();
-        clampBolts(tolerance);
+        //clampBolts(tolerance);
         connectionBolt(tolerance);
     }
 }
@@ -82,16 +82,25 @@ module bottomPart() {
     }
 }
 
+// The ring, including the 'wings' that bind the two halves
 module ring() {
     $fn = 100;
     rotate([90, 0, 0]) difference() {
         union() {
             cylinder(r = hole_radius + ring_size, h = klem_thickness, center = true);
-            cube(size = [wing_width,
-                          wingHeight, wing_thickness], center = true);
+            wing();
         }
         cylinder(r = hole_radius, h = 1.2 * klem_thickness, center = true);
         cube(size = [wing_width + 2, gap_thickness, klem_thickness + 2], center = true);
+    }
+}
+
+// The wings of the ring
+module wing() {
+    tolerance = 0.5;
+    difference() {
+        cube(size = [wing_width,wingHeight, wing_thickness], center = true);
+        rotate([90, 0, 0]) clampBolts(tolerance);
     }
 }
 
