@@ -5,7 +5,7 @@ top = 2;
 bottom = 3;
 toHold = 4;
 
-display = toHold;
+display = full;
 
 parts = 1;
 top_part = 0;
