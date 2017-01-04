@@ -95,12 +95,55 @@ module ring() {
     }
 }
 
+module topWedge() {
+    // Setup variables
+    
+    // Angle of line from center to edge of the wing
+    theta = atan2(wingHeight/2, wing_width/2);
+    echo("theta = ", theta);
+    
+    // Distance from center to edge of the wing
+    d = wingHeight / 2 / sin(theta);
+    echo("d = ", d);
+    echo("r = ", hole_radius + ring_size);
+    
+    // Angle between line to wing edge and tangent point
+    phi = acos((hole_radius + ring_size) / d);
+    echo("phi = ", phi);
+    
+    // Angle between horizontal and radius to tangent
+    alpha = theta + phi;
+    
+    // Coordinates of the tangent point
+    xt = (hole_radius + ring_size) * cos(alpha);
+    yt = (hole_radius + ring_size) * sin(alpha);
+    
+    echo("xt = ", xt);
+    echo("yt = ", yt);
+    
+    difference() {
+        linear_extrude(height = klem_thickness, center = true)
+            polygon(points = [
+                [wing_width/2, wingHeight / 2],
+                [-wing_width/2, wingHeight / 2],
+                [-xt, yt],
+                [xt, yt]
+            ]);
+        for (side = [1, -1]) rotate([-90, 0, 0])  
+            translate([side * (wing_width/2 - capRadius - 3), 0, wingHeight / 2])
+                cylinder(r = capRadius + 1, h = 1000, center = false);
+    }
+        
+}
 // The wings of the ring
 module wing() {
     tolerance = 0.5;
     difference() {
-        cube(size = [wing_width,wingHeight, wing_thickness], center = true);
-        rotate([90, 0, 0]) clampBolts(tolerance);
+        union() {
+            cube(size = [wing_width, wingHeight, wing_thickness], center = true);
+            topWedge();
+        }
+        rotate([-90, 0, 0]) clampBolts(tolerance);
     }
 }
 
@@ -130,4 +173,4 @@ if (display == full) {
             bottomPart();
 } else if (display == toHold) {
     cylinder(r = hole_radius, h = 20, $fn = 100);
-}
+} else topWedge();
