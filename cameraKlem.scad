@@ -31,6 +31,32 @@ wing_extension = 2 * capRadius + 6;
 wing_width = (hole_radius + ring_size + wing_extension) * 2;
 wingHeight = boltLength + cap_height - 0.5;
 
+///////////////////////////////////////////////////
+// Camera and lens as dummy 
+///////////////////////////////////////////////////
+coreRadius = hole_diameter / 2;
+coreLength = 25;
+
+cameraRadius = 60;
+cameraWidth = 40;
+
+adapterRadius = 64.5 /2;
+adapterDepth = 23;
+
+lensRadius = 70 / 2;
+lensLength = 130;
+
+module cameraLens() {
+    union() {
+        cylinder(r = coreRadius, h = coreLength + 5, center = false);
+        translate([0, 0, -(cameraWidth - 1)])
+            color("red") cylinder(r = cameraRadius, h = cameraWidth, center = false);
+        translate([0, 0, coreLength])
+            color("silver") cylinder(r = adapterRadius, h = adapterDepth, center = false);
+        translate([0, 0, coreLength + adapterDepth])
+            color("black") cylinder(r = lensRadius, h = lensLength, center = false);
+    }
+}
 
 module clampBolts(t = 0) {
     $fn = 100;
@@ -158,6 +184,7 @@ if (display == full) {
 		klem();
         color("MediumPurple")clampBolts(0);
         color("MediumPurple") connectionBolt(0);
+        rotate([-90,00,0]) translate([ 0, 0, -klem_thickness/2-2.5]) cameraLens();
 } else if (display == top) {
         translate([0, 0, klem_thickness / 2])
         rotate([90, 0, 0])
@@ -173,4 +200,4 @@ if (display == full) {
             bottomPart();
 } else if (display == toHold) {
     cylinder(r = hole_radius, h = 20, $fn = 100);
-} else topWedge();
+} else cameraLens();
