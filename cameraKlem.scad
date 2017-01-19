@@ -183,22 +183,22 @@ module leg() {
     footLength = 56;
     footHeight = 22;
     
-//    rotate([-90, 0, 0]) //
-//    translate([0,
-//               legHeight / 2 // top to center
-//               + hole_diameter / 2,  // top to inner radius
-//               0]) 
+    rotate([-90, 0, 0]) //
+    translate([0,
+               legHeight / 2 // top to center
+               + hole_diameter / 2,  // top to inner radius
+               0]) 
     union() {
         cube([footWidth, legHeight, klem_thickness], center = true); // leg
         translate([0, -(footHeight -legHeight) / 2, (footLength - klem_thickness)/ 2]) 
             cube([footWidth, footHeight, footLength], center = true);
-        linear_extrude(height = klem_thickness, center = true)
-            polygon(points = [
-                [wing_width/2, wingHeight / 2],
-                [-wing_width/2, wingHeight / 2],
-                [-xt, yt],
-                [xt, yt]
-            ]);
+//        linear_extrude(height = klem_thickness, center = true)
+//            polygon(points = [
+//                [wing_width/2, wingHeight / 2],
+//                [-wing_width/2, wingHeight / 2],
+//                [-xt, yt],
+//                [xt, yt]
+//            ]);
    }
                
 }
