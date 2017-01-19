@@ -4,6 +4,7 @@ full = 1;
 top = 2;
 bottom = 3;
 toHold = 4;
+calibrate = 5;
 
 display = full;
 
@@ -17,6 +18,10 @@ klem_thickness = 21;
 
 wing_thickness = 21;
 wing_height = 30;
+
+// Leg/foot dimensions
+legHeight = 30; // from inner radius till bottom
+footWidth = 28.6;    // width of the zwaluwstaart
 
 gap_thickness = 5;
 
@@ -81,6 +86,9 @@ module connectionBolt(tol) {
     }
 }
 
+////////////////////////////////////////////////////////////////
+// The total setup
+////////////////////////////////////////////////////////////////]
 module klem() {
     echo("Klem:");
     tolerance = 0.5;
@@ -91,22 +99,15 @@ module klem() {
     }
 }
 
+// All parts combined
 module fullPart() {
     echo ("FullPart");
     union() {
         ring();
-        footWedge();
+        leg();
     }
 }
 
-module bottomPart() {
-    cut_height = hole_radius + 30 + 2;
-    intersection() {
-        translate([0, 20/2, -cut_height/2])
-        cube([wing_width + 2, 40 + 2, cut_height], center = true);
-        klem();
-    }
-}
 
 // The ring, including the 'wings' that bind the two halves
 module ring() {
@@ -173,11 +174,58 @@ module wing() {
     }
 }
 
+/////////////////////////////////////////////////////////////////////////
+// The bottom part
+/////////////////////////////////////////////////////////////////////////
+
+// The leg towards the rail
+module leg() {
+    footLength = 56;
+    footHeight = 22;
+    
+//    rotate([-90, 0, 0]) //
+//    translate([0,
+//               legHeight / 2 // top to center
+//               + hole_diameter / 2,  // top to inner radius
+//               0]) 
+    union() {
+        cube([footWidth, legHeight, klem_thickness], center = true); // leg
+        translate([0, -(footHeight -legHeight) / 2, (footLength - klem_thickness)/ 2]) 
+            cube([footWidth, footHeight, footLength], center = true);
+        linear_extrude(height = klem_thickness, center = true)
+            polygon(points = [
+                [wing_width/2, wingHeight / 2],
+                [-wing_width/2, wingHeight / 2],
+                [-xt, yt],
+                [xt, yt]
+            ]);
+   }
+               
+}
+
 module footWedge() {
     translate([-25, -21 /2, -(30 + hole_radius)])
     rotate([0, 0, 90])  rotate([90, 0, 0])
     linear_extrude(height = 50, center = false)
         polygon(points = [[0,0], [28.5,0], [28.5, 5], [21,30], [0,30]]);
+}
+
+module bottomPart() {
+    cut_height = hole_radius + 30 + 2;
+    intersection() {
+        translate([0, 20/2, -cut_height/2])
+            cube([wing_width + 2, 40 + 2, cut_height], center = true);
+        klem();
+    }
+}
+
+/////////////////////////////////////////////////////////////////////
+// Small cube to check the calibration of the printer
+// The horizontal dimension after the printing should be the defined
+// foot width
+/////////////////////////////////////////////////////////////////////
+module calibrate() {
+    cube([footWidth, footWidth, 5], center = true);
 }
 
 if (display == full) {
@@ -200,4 +248,6 @@ if (display == full) {
             bottomPart();
 } else if (display == toHold) {
     cylinder(r = hole_radius, h = 20, $fn = 100);
-} else cameraLens();
+} else if (display == calibrate) {
+    calibrate();
+} else leg();
