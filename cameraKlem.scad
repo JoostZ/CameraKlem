@@ -6,7 +6,7 @@ bottom = 3;
 toHold = 4;
 calibrate = 5;
 
-display = full;
+display = bottom;
 
 parts = 1;
 top_part = 0;
@@ -77,6 +77,7 @@ module clampBolts(t = 0) {
 module connectionBolt(tol) {
     $fn = 100;
     boltLeng =  30 + 2;
+    boltType = 6; // M6
     echo ("bolt length = ", boltLeng);
     echo ("Tolerance = ", tol);
     translate([0, 0, -(30 + hole_radius)])
@@ -104,7 +105,7 @@ module fullPart() {
     echo ("FullPart");
     union() {
         ring();
-        leg();
+        //leg();
     }
 }
 
@@ -116,6 +117,7 @@ module ring() {
         union() {
             cylinder(r = hole_radius + ring_size, h = klem_thickness, center = true);
             wing();
+            leg();
         }
         cylinder(r = hole_radius, h = 1.2 * klem_thickness, center = true);
         cube(size = [wing_width + 2, gap_thickness, klem_thickness + 2], center = true);
@@ -158,7 +160,7 @@ module topWedge() {
             ]);
         for (side = [1, -1]) rotate([-90, 0, 0])  
             translate([side * (wing_width/2 - capRadius - 3), 0, wingHeight / 2])
-                cylinder(r = capRadius + 1, h = 1000, center = false);
+                cylinder(r = capRadius + 2, h = 10, center = false);
     }
         
 }
@@ -183,32 +185,38 @@ module leg() {
     footLength = 56;
     footHeight = 22;
     
-    rotate([-90, 0, 0]) //
-    translate([0,
-               legHeight / 2 // top to center
-               + hole_diameter / 2,  // top to inner radius
-               0]) 
+    rotate([180, 0, 0]) 
     union() {
-        cube([footWidth, legHeight, klem_thickness], center = true); // leg
-        translate([0, -(footHeight -legHeight) / 2, (footLength - klem_thickness)/ 2]) 
-            cube([footWidth, footHeight, footLength], center = true);
-//        linear_extrude(height = klem_thickness, center = true)
-//            polygon(points = [
-//                [wing_width/2, wingHeight / 2],
-//                [-wing_width/2, wingHeight / 2],
-//                [-xt, yt],
-//                [xt, yt]
-//            ]);
-   }
-               
+        translate([0,
+                   legHeight / 2 // top to center
+                   + hole_diameter / 2,  // top to inner radius
+                   0]) 
+        union() {
+            cube([footWidth, legHeight, klem_thickness], center = true); // leg
+            translate([0, -(footHeight -legHeight) / 2, (footLength - klem_thickness)/ 2]) 
+                cube([footWidth, footHeight, footLength], center = true);
+       }
+       bottomWedge();
+   }     
 }
 
-module footWedge() {
-    translate([-25, -21 /2, -(30 + hole_radius)])
-    rotate([0, 0, 90])  rotate([90, 0, 0])
-    linear_extrude(height = 50, center = false)
-        polygon(points = [[0,0], [28.5,0], [28.5, 5], [21,30], [0,30]]);
+module bottomWedge() {
+    bottomLeg = hole_radius + legHeight;
+    boltCenter = wing_width/2 - capRadius - 3; 
+    difference() {
+        linear_extrude(height = klem_thickness, center = true)
+            polygon(points = [
+                [footWidth/2, bottomLeg - 5],
+                [boltCenter, wingHeight / 2],
+                [-boltCenter, wingHeight / 2],
+                [-footWidth/2, bottomLeg - 5]
+            ]);
+        for (side = [1, -1]) rotate([-90, 0, 0])  
+            translate([side * (wing_width/2 - capRadius - 3), 0, wingHeight / 2])
+                cylinder(r = capRadius + 1, h = 1000, center = false);
+    }
 }
+
 
 module bottomPart() {
     cut_height = hole_radius + 30 + 2;
