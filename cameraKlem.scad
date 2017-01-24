@@ -5,16 +5,23 @@ top = 2;
 bottom = 3;
 toHold = 4;
 calibrate = 5;
+///////////////////////////////////////////////////////////////////
+// Which part to render. Use a string value chosen
+// from one of the following.
+// - full   The full clamp, including the cameral/lens placeholder
+// - top    The top part of the clamp, ready to be printed
+// - bottom The top part of the clamp, ready to be printed
+// - toHold A cylinder the size of the lens to hold. Reay for print
+// - calibrate A small cube to test the size of the foot
+////////////////////////////////////////////////////////////////////
+display = "bottom";
 
-display = bottom;
-
-parts = 1;
-top_part = 0;
-// Sizes
-
-hole_diameter = 57;
-ring_size = 10;
-klem_thickness = 21;
+////////////////////////////////////////////////////////////////////
+// Basic dimentsionss
+////////////////////////////////////////////////////////////////////
+hole_diameter = 57; // The internal hole
+ring_size = 10;     // The thickness of the ring
+klem_thickness = 21;// 
 
 wing_thickness = 21;
 wing_height = 30;
@@ -236,12 +243,12 @@ module calibrate() {
     cube([footWidth, footWidth, 5], center = true);
 }
 
-if (display == full) {
+if (display == "full") {
 		klem();
         color("MediumPurple")clampBolts(0);
         color("MediumPurple") connectionBolt(0);
         rotate([-90,00,0]) translate([ 0, 0, -klem_thickness/2-2.5]) cameraLens();
-} else if (display == top) {
+} else if (display == "top") {
         translate([0, 0, klem_thickness / 2])
         rotate([90, 0, 0])
             intersection() {
@@ -250,12 +257,12 @@ if (display == full) {
                         hole_radius + ring_size + 2], center = true);
                 klem();
             }
-} else if (display == bottom) {
+} else if (display == "bottom") {
         translate([0, 0, klem_thickness / 2])
         rotate([90, 0, 0])
             bottomPart();
-} else if (display == toHold) {
+} else if (display == "toHold") {
     cylinder(r = hole_radius, h = 20, $fn = 100);
-} else if (display == calibrate) {
+} else if (display == "calibrate") {
     calibrate();
 } else leg();
