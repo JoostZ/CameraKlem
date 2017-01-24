@@ -1,10 +1,6 @@
 include <MCAD/nuts_and_bolts.scad>
-// Presentation
-full = 1;
-top = 2;
-bottom = 3;
-toHold = 4;
-calibrate = 5;
+
+
 ///////////////////////////////////////////////////////////////////
 // Which part to render. Use a string value chosen
 // from one of the following.
@@ -14,7 +10,7 @@ calibrate = 5;
 // - toHold A cylinder the size of the lens to hold. Reay for print
 // - calibrate A small cube to test the size of the foot
 ////////////////////////////////////////////////////////////////////
-display = "bottom";
+display = "calibrate";
 
 ////////////////////////////////////////////////////////////////////
 // Basic dimentsionss
@@ -29,6 +25,8 @@ wing_height = 30;
 // Leg/foot dimensions
 legHeight = 30; // from inner radius till bottom
 footWidth = 28.6;    // width of the zwaluwstaart
+footLength = 56;
+footHeight = 22;
 
 gap_thickness = 5;
 
@@ -37,6 +35,7 @@ boltLength = 20;
 
 // Derived parameters
 hole_radius = hole_diameter / 2;
+outerRadius = hole_radius + ring_size;
 cap_height = METRIC_NUT_THICKNESS[boltType];
 capRadius = METRIC_NUT_AC_WIDTHS[boltType] / 2;
 wing_extension = 2 * capRadius + 6;
@@ -102,8 +101,7 @@ module klem() {
     tolerance = 0.5;
 	difference() {
 		fullPart();
-        //clampBolts(tolerance);
-        connectionBolt(tolerance);
+        rotate([-90, 0, 0]) connectionBolt(tolerance);
     }
 }
 
@@ -120,7 +118,7 @@ module fullPart() {
 // The ring, including the 'wings' that bind the two halves
 module ring() {
     $fn = 100;
-    rotate([90, 0, 0]) difference() {
+    difference() {
         union() {
             cylinder(r = hole_radius + ring_size, h = klem_thickness, center = true);
             wing();
@@ -189,18 +187,17 @@ module wing() {
 
 // The leg towards the rail
 module leg() {
-    footLength = 56;
-    footHeight = 22;
     
-    rotate([180, 0, 0]) 
+    
+    //rotate([180, 0, 0]) 
     union() {
         translate([0,
-                   legHeight / 2 // top to center
-                   + hole_diameter / 2,  // top to inner radius
+                   -legHeight / 2 // top to center
+                   - hole_diameter / 2,  // top to inner radius
                    0]) 
         union() {
             cube([footWidth, legHeight, klem_thickness], center = true); // leg
-            translate([0, -(footHeight -legHeight) / 2, (footLength - klem_thickness)/ 2]) 
+            translate([0, (footHeight -legHeight) / 2, (footLength - klem_thickness)/ 2]) 
                 cube([footWidth, footHeight, footLength], center = true);
        }
        bottomWedge();
@@ -213,13 +210,14 @@ module bottomWedge() {
     difference() {
         linear_extrude(height = klem_thickness, center = true)
             polygon(points = [
-                [footWidth/2, bottomLeg - 5],
-                [boltCenter, wingHeight / 2],
-                [-boltCenter, wingHeight / 2],
-                [-footWidth/2, bottomLeg - 5]
+                [footWidth/2, -(bottomLeg - 5)],
+                [boltCenter, -wingHeight / 2],
+                [-boltCenter, -wingHeight / 2],
+                [-footWidth/2, -(bottomLeg - 5)]
             ]);
-        for (side = [1, -1]) rotate([-90, 0, 0])  
-            translate([side * (wing_width/2 - capRadius - 3), 0, wingHeight / 2])
+        for (side = [1, -1])   
+            translate([side * (wing_width/2 - capRadius - 3), -wingHeight / 2, 0])
+        rotate([90, 0, 0])
                 cylinder(r = capRadius + 1, h = 1000, center = false);
     }
 }
@@ -228,8 +226,16 @@ module bottomWedge() {
 module bottomPart() {
     cut_height = hole_radius + 30 + 2;
     intersection() {
-        translate([0, 20/2, -cut_height/2])
-            cube([wing_width + 2, 40 + 2, cut_height], center = true);
+        translate([0, -cut_height/2, footLength / 2 - klem_thickness / 2])
+            cube([wing_width + 2, cut_height, footLength + 2], center = true);
+        klem();
+    }
+}
+module topPart() {
+    cut_height = outerRadius + 2;
+    intersection() {
+        translate([0, cut_height/2, 0])
+            cube([wing_width + 2, cut_height, 40 + 2], center = true);
         klem();
     }
 }
@@ -240,27 +246,18 @@ module bottomPart() {
 // foot width
 /////////////////////////////////////////////////////////////////////
 module calibrate() {
-    cube([footWidth, footWidth, 5], center = true);
+    cube([footWidth, footWidth, 5], center = false);
 }
 
 if (display == "full") {
-		klem();
-        color("MediumPurple")clampBolts(0);
+		rotate([90, 0, 180]) klem();
+        color("MediumPurple") clampBolts(0);
         color("MediumPurple") connectionBolt(0);
         rotate([-90,00,0]) translate([ 0, 0, -klem_thickness/2-2.5]) cameraLens();
 } else if (display == "top") {
-        translate([0, 0, klem_thickness / 2])
-        rotate([90, 0, 0])
-            intersection() {
-                translate([0, 0, (hole_radius + ring_size) / 2])
-                cube([wing_width + 2, klem_thickness + 2,
-                        hole_radius + ring_size + 2], center = true);
-                klem();
-            }
+        translate ([0, 0, klem_thickness / 2]) topPart();
 } else if (display == "bottom") {
-        translate([0, 0, klem_thickness / 2])
-        rotate([90, 0, 0])
-            bottomPart();
+        translate([0, 0, klem_thickness / 2]) bottomPart();
 } else if (display == "toHold") {
     cylinder(r = hole_radius, h = 20, $fn = 100);
 } else if (display == "calibrate") {
