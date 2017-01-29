@@ -25,7 +25,7 @@ wing_height = 30;
 // Leg/foot dimensions
 legHeight = 30; // from inner radius till bottom
 footWidth = 28.6;    // width of the zwaluwstaart
-footLength = 56;
+footLength = 42;
 footHeight = 22;
 
 gap_thickness = 5;
