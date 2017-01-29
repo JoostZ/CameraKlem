@@ -10,7 +10,7 @@ include <MCAD/nuts_and_bolts.scad>
 // - toHold A cylinder the size of the lens to hold. Reay for print
 // - calibrate A small cube to test the size of the foot
 ////////////////////////////////////////////////////////////////////
-display = "calibrate";
+display = "full";
 
 ////////////////////////////////////////////////////////////////////
 // Basic dimentsionss
@@ -77,19 +77,21 @@ module clampBolts(t = 0) {
            boltHole(boltType,MM,tolerance = t, boltLength);
            translate([0, 0, boltLength - cap_height]) nutHole(size = boltType, tolerance = t);
         }
-    //echo("cap height = ", cap_height);
+    echo("cap height = ", cap_height);
 }
 
 module connectionBolt(tol) {
     $fn = 100;
     boltLeng =  30 + 2;
     boltType = 6; // M6
+    capHeight = METRIC_NUT_THICKNESS[boltType]; 
     echo ("bolt length = ", boltLeng);
     echo ("Tolerance = ", tol);
+    echo("capHeight", capHeight);
     translate([0, 0, -(30 + hole_radius)])
     union() {
         boltHole(boltType, MM, tolerance = tol, boltLeng );
-        translate([0, 0, boltLeng - 1 - cap_height]) nutHole(size = boltType, tolerance = tol);
+        translate([0, 0, boltLeng - 1 - capHeight]) nutHole(size = boltType, tolerance = tol);
     }
 }
 
